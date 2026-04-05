@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>X-GEN V4 | Premium Mod Menu</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #050507;
+            --panel-bg: #0f0f15;
+            --accent: #8b2cf5;
+            --accent-glow: rgba(139, 44, 245, 0.4);
+            --text-main: #e0e0e0;
+            --text-dim: #707075;
+            --success: #00ff88;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Rajdhani', sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-image: radial-gradient(circle at 50% 50%, #1a1025 0%, transparent 80%);
+            padding: 20px 0;
+        }
+
+        /* Stream Mode Effect */
+        body.stream-active .app-container {
+            opacity: 0.5;
+            filter: contrast(1.2) brightness(0.8);
+        }
+
+        .app-container {
+            width: 90%;
+            max-width: 380px;
+            background: var(--panel-bg);
+            border: 1px solid rgba(139, 44, 245, 0.2);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 15px var(--accent-glow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.4rem;
+            margin: 0;
+            letter-spacing: 3px;
+            background: linear-gradient(to right, #fff, var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header .subtitle {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 5px;
+        }
+
+        .status-bar {
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.7rem;
+            margin-bottom: 15px;
+            border-left: 3px solid var(--accent);
+        }
+
+        .status-item span {
+            color: var(--success);
+            font-weight: bold;
+        }
+
+        /* Feature List Scrollable */
+        .features-wrapper {
+            max-height: 350px;
+            overflow-y: auto;
+            padding-right: 5px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* Scrollbar styling */
+        .features-wrapper::-webkit-scrollbar {
+            width: 3px;
+        }
+        .features-wrapper::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 10px;
+        }
+
+        .feature-card {
+            background: rgba(255,255,255,0.03);
+            border-radius: 10px;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* Special Styling for Sliders */
+        .feature-card.column {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .feature-info .name {
+            display: block;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .feature-info .desc {
+            font-size: 0.65rem;
+            color: var(--text-dim);
+        }
+
+        /* Switch UI */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+        }
+
+        .switch input { opacity: 0; width: 0; height: 0; }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #2a2a30;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 14px;
+            width: 14px;
+            left: 3px;
+            bottom: 3px;
+            background-color: #777;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider { background-color: var(--accent); }
+        input:checked + .slider:before { transform: translateX(20px); background-color: white; }
+
+        /* Range Slider Styling */
+        .range-container {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        input[type=range] {
+            flex: 1;
+            height: 4px;
+            background: #2a2a30;
+            border-radius: 5px;
+            outline: none;
+            accent-color: var(--accent);
+        }
+
+        .range-value {
+            font-size: 0.8rem;
+            color: var(--accent);
+            min-width: 30px;
+            text-align: right;
+            font-family: monospace;
+        }
+
+        .console {
+            margin-top: 15px;
+            background: #000;
+            border-radius: 6px;
+            padding: 8px;
+            height: 70px;
+            font-family: monospace;
+            font-size: 0.6rem;
+            color: #00ffcc;
+            overflow-y: hidden;
+            border: 1px solid rgba(0, 255, 204, 0.1);
+            line-height: 1.3;
+        }
+
+        .inject-btn {
+            margin-top: 15px;
+            width: 100%;
+            background: linear-gradient(45deg, #6a11cb 0%, var(--accent) 100%);
+            border: none;
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: bold;
+            font-size: 0.85rem;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        .watermark {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 0.7rem;
+            color: var(--text-dim);
+        }
+
+        /* Overlay & Prank */
+        #overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 999;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .loader {
+            width: 50px;
+            height: 50px;
+            border: 3px solid transparent;
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        #prank-modal {
+            display: none;
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            background: #1a1a25;
+            border: 2px solid var(--accent);
+            padding: 25px;
+            text-align: center;
+            border-radius: 12px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <div class="header">
+            <h1>X-GEN V4</h1>
+            <div class="subtitle">Official Bypass System</div>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-item">Server: <span>ONLINE</span></div>
+            <div class="status-item">Anti-Ban: <span>ACTIVE</span></div>
+        </div>
+
+        <div class="features-wrapper">
+            <!-- Stream Mode -->
+            <div class="feature-card">
+                <div class="feature-info">
+                    <span class="name">STREAM MODE</span>
+                    <span class="desc">Hide UI from Screen Record</span>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" onchange="toggleStream(this)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <!-- Aimneck -->
+            <div class="feature-card">
+                <div class="feature-info">
+                    <span class="name">AIMNECK</span>
+                    <span class="desc">Silent aim target neck area</span>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" onchange="updateLog('Aimneck: Enabled')">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <!-- AimFOV Slider -->
+            <div class="feature-card column">
+                <div class="feature-info">
+                    <span class="name">AIM FOV</span>
+                    <span class="desc">Range for auto aim tracking</span>
+                </div>
+                <div class="range-container">
+                    <input type="range" min="0" max="360" value="90" oninput="updateFOV(this)">
+                    <span class="range-value" id="fovVal">90°</span>
+                </div>
+            </div>
+
+            <!-- Mini Gloo Wall -->
+            <div class="feature-card">
+                <div class="feature-info">
+                    <span class="name">MINI GLOOWALL</span>
+                    <span class="desc">Reduce wall size for vision</span>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" onchange="updateLog('MiniGloo: Patching mesh...')">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <!-- No FPS Limit -->
+            <div class="feature-card">
+                <div class="feature-info">
+                    <span class="name">NO FPS LIMIT</span>
+                    <span class="desc">Unlock maximum framerate</span>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" onchange="updateLog('V-Sync bypassed: 120+ FPS')">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <!-- Default Features -->
+            <div class="feature-card">
+                <div class="feature-info">
+                    <span class="name">AIMLOCK v4.2</span>
+                    <span class="desc">Auto-head tracking</span>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" onchange="updateLog('Aimlock: Target Acquired')">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-info">
+                    <span class="name">MB HS ANGIN</span>
+                    <span class="desc">High damage bypass hit</span>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" onchange="updateLog('HitReg: Multiplier Active')">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <div class="console" id="console">
+            [SYS] Waiting for user input...
+        </div>
+
+        <button class="inject-btn" onclick="startInjection()">Inject Features</button>
+
+        <div class="watermark">
+            Developed by <strong>Botaktrogonff</strong>
+        </div>
+    </div>
+
+    <!-- Overlay Loading -->
+    <div id="overlay">
+        <div class="loader"></div>
+        <div class="loading-text" id="loading-txt" style="color: var(--accent); margin-top: 15px; font-family: 'Orbitron';">AUTHENTICATING...</div>
+    </div>
+
+    <!-- Prank Modal -->
+    <div id="prank-modal">
+        <h2 style="color: #ff4444;">AWKWKWK!</h2>
+        <p>Anda kena Prank oleh <b>Botaktrogonff</b>!</p>
+        <p>Gak ada cheat-cheatan, main jujur aja ya bos!</p>
+        <button class="close-btn" style="background: var(--accent); border: none; color: white; padding: 8px 20px; border-radius: 5px; margin-top: 15px; cursor: pointer;" onclick="location.reload()">Saya Tobat</button>
+    </div>
+
+    <script>
+        function updateLog(msg) {
+            const consoleBox = document.getElementById('console');
+            const time = new Date().toLocaleTimeString([], {hour12: false, hour: '2-digit', minute:'2-digit', second:'2-digit'});
+            consoleBox.innerHTML = `[${time}] ${msg}<br>` + consoleBox.innerHTML;
+        }
+
+        function toggleStream(cb) {
+            if (cb.checked) {
+                document.body.classList.add('stream-active');
+                updateLog('Stream Mode: ON (Menu hidden from recording)');
+            } else {
+                document.body.classList.remove('stream-active');
+                updateLog('Stream Mode: OFF');
+            }
+        }
+
+        function updateFOV(el) {
+            document.getElementById('fovVal').innerText = el.value + '°';
+            if (el.value % 50 === 0) updateLog(`AimFOV set to ${el.value} degrees`);
+        }
+
+        function startInjection() {
+            const overlay = document.getElementById('overlay');
+            const loadTxt = document.getElementById('loading-txt');
+            overlay.style.display = 'flex';
+
+            const steps = [
+                "BYPASSING ANTICHEAT...",
+                "LOADING AIMNECK DATA...",
+                "UNLOCKING FPS LIMIT...",
+                "PATCHING GLOOWALL MESH...",
+                "ENCRYPTING SCRIPTS...",
+                "INJECTION SUCCESS!"
+            ];
+
+            let i = 0;
+            const interval = setInterval(() => {
+                if (i < steps.length) {
+                    loadTxt.innerText = steps[i];
+                    i++;
+                } else {
+                    clearInterval(interval);
+                    document.getElementById('overlay').style.display = 'none';
+                    document.getElementById('prank-modal').style.display = 'block';
+                }
+            }, 1100);
+        }
+    </script>
+</body>
+</html>
+
