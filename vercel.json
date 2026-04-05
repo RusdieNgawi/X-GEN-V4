@@ -1,9 +1,10 @@
 {
   "version": 2,
   "name": "x-gen-v4-prank",
+  "hasConnect": false,
+  "public": true,
   "cleanUrls": true,
-  "framework": null,
-  "installCommand": "echo 'No install needed'",
-  "buildCommand": "echo 'No build needed'"
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }
-
