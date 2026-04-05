@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>X-GEN V4 | Premium Mod Menu</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #050507;
+            --panel-bg: #0f0f15;
+            --accent: #8b2cf5;
+            --accent-glow: rgba(139, 44, 245, 0.4);
+            --text-main: #e0e0e0;
+            --text-dim: #707075;
+            --success: #00ff88;
+            --premium: #ffcc00;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Rajdhani', sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-image: radial-gradient(circle at 50% 50%, #1a1025 0%, transparent 80%);
+            padding: 20px 0;
+        }
+
+        /* Stream Mode Styling */
+        body.stream-active .app-container {
+            opacity: 0.75;
+            filter: brightness(0.9) contrast(1.1);
+        }
+
+        .app-container {
+            width: 92%;
+            max-width: 380px;
+            background: var(--panel-bg);
+            border: 1px solid rgba(139, 44, 245, 0.2);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 15px var(--accent-glow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        .header h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.35rem;
+            margin: 0;
+            letter-spacing: 3px;
+            background: linear-gradient(to right, #fff, var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .status-bar {
+            background: rgba(0,0,0,0.4);
+            border-radius: 8px;
+            padding: 6px 12px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.65rem;
+            margin-bottom: 12px;
+            border-left: 3px solid var(--accent);
+        }
+
+        .status-item span { color: var(--success); font-weight: bold; }
+
+        /* Fitur List Scrollable */
+        .features-wrapper {
+            max-height: 440px;
+            overflow-y: auto;
+            padding-right: 5px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .features-wrapper::-webkit-scrollbar { width: 3px; }
+        .features-wrapper::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
+
+        .feature-card {
+            background: rgba(255,255,255,0.03);
+            border-radius: 10px;
+            padding: 10px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(255,255,255,0.05);
+            position: relative;
+        }
+
+        /* Garis Tepi Kiri Indikator */
+        .card-stream { border-left: 3px solid var(--success); }
+        .card-premium { border-left: 3px solid var(--premium); background: rgba(255, 204, 0, 0.03); }
+
+        .feature-info .name { display: block; font-weight: 600; font-size: 0.85rem; }
+        .feature-info .desc { font-size: 0.6rem; color: var(--text-dim); }
+
+        /* Dropdown UI */
+        .select-box {
+            background: #1a1a25;
+            color: var(--text-main);
+            border: 1px solid var(--accent);
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-family: 'Rajdhani';
+            font-size: 0.75rem;
+            outline: none;
+            cursor: pointer;
+        }
+
+        /* Slider UI */
+        .range-container { width: 100%; display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+        input[type=range] { flex: 1; height: 3px; accent-color: var(--accent); cursor: pointer; }
+        .range-value { font-size: 0.75rem; color: var(--accent); font-family: monospace; min-width: 35px; text-align: right; }
+
+        /* Switch UI */
+        .switch { position: relative; display: inline-block; width: 36px; height: 18px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #2a2a30; transition: .4s; border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute; content: ""; height: 12px; width: 12px;
+            left: 3px; bottom: 3px; background-color: #777; transition: .4s; border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--accent); }
+        input:checked + .slider:before { transform: translateX(18px); background-color: white; }
+
+        /* Gembok Premium */
+        .lock-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            backdrop-filter: blur(1px);
+        }
+        .lock-text { color: var(--premium); font-size: 0.65rem; font-weight: bold; margin-top: 5px; text-align: center; }
+
+        /* Konsol Sistem */
+        .console {
+            margin-top: 12px;
+            background: #000;
+            border-radius: 6px;
+            padding: 8px;
+            height: 65px;
+            font-family: monospace;
+            font-size: 0.58rem;
+            color: #00ffcc;
+            overflow: hidden;
+            border: 1px solid rgba(0, 255, 204, 0.1);
+            line-height: 1.3;
+        }
+
+        .inject-btn {
+            margin-top: 12px;
+            width: 100%;
+            background: linear-gradient(45deg, #6a11cb 0%, var(--accent) 100%);
+            border: none;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            font-family: 'Orbitron';
+            font-weight: bold;
+            font-size: 0.8rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            box-shadow: 0 4px 15px rgba(139, 44, 245, 0.3);
+        }
+
+        /* Modals & Overlay */
+        #overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.98); z-index: 999; flex-direction: column; justify-content: center; align-items: center;
+        }
+        .loader { width: 50px; height: 50px; border: 3px solid transparent; border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
+        
+        #success-modal {
+            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 320px; background: #0a0a0f; border: 1px solid var(--success); padding: 25px;
+            text-align: center; border-radius: 12px; z-index: 1000; box-shadow: 0 0 40px rgba(0, 255, 136, 0.2);
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <div class="header">
+            <h1>X-GEN V4</h1>
+            <div class="subtitle" style="font-size: 0.6rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px;">Universal Bypass Engine v4.0.5</div>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-item">Server: <span>ONLINE</span></div>
+            <div class="status-item">Anti-Ban: <span>ACTIVE</span></div>
+        </div>
+
+        <div class="features-wrapper">
+            <!-- Stream Mode -->
+            <div class="feature-card card-stream">
+                <div class="feature-info">
+                    <span class="name">STREAM MODE</span>
+                    <span class="desc">Garis Hijau: Bypass Capture Screen</span>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" onchange="toggleStream(this)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <!-- Aimlock V3.2 -->
+            <div class="feature-card">
+                <div class="feature-info">
+                    <span class="name">AIMLOCK V3.2</span>
+                    <span class="desc">Classic aim assistance module</span>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" onchange="updateLog('Aimlock V3.2: Hooking memory...')">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <!-- Enhanced Aimtracking -->
+            <div class="feature-card">
+                <div class="feature-info">
+                    <span class="name">ENHANCED AIMTRACKING</span>
+                    <span class="desc">Dynamic prediction algorithm v2</span>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" onchange="updateLog('Aimtracking: Engine Optimized')">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <!-- Targeting Choice -->
+            <div class="feature-card">
+                <div class="feature-info">
+                    <span class="name">TARGETING POINT</span>
+                    <span class="desc">Prioritaskan Head / Body</span>
+                </div>
+                <select class="select-box" onchange="updateLog('Targeting priority: ' + this.value)">
+                    <option value="Head">HEAD</option>
+                    <option value="Body">BODY</option>
+                </select>
+            </div>
+
+            <!-- AimFOV Slider -->
+            <div class="feature-card" style="flex-direction: column; align-items: flex-start;">
+                <div class="feature-info">
+                    <span class="name">AIM FOV</span>
+                    <span class="desc">Jangkauan area deteksi otomatis</span>
+                </div>
+                <div class="range-container">
+                    <input type="range" min="0" max="360" value="90" oninput="updateFOV(this)">
+                    <span class="range-value" id="fovVal">90°</span>
+                </div>
+            </div>
+
+            <!-- Radarbox & Distance Slider -->
+            <div class="feature-card" style="flex-direction: column; align-items: flex-start;">
+                <div class="feature-info" style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+                    <div>
+                        <span class="name">RADARBOX</span>
+                        <span class="desc">Visual 2D Map ESP Radar</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" onchange="updateLog('Radarbox: Scan sequence started')">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="range-container">
+                    <span style="font-size: 0.6rem; color: var(--text-dim);">Distance:</span>
+                    <input type="range" min="50" max="500" value="200" oninput="updateDistance(this)">
+                    <span class="range-value" id="distVal">200m</span>
+                </div>
+            </div>
+
+            <!-- Aimneck -->
+            <div class="feature-card">
+                <div class="feature-info">
+                    <span class="name">AIMNECK</span>
+                    <span class="desc">Lock target on neck bypass hitreg</span>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" onchange="updateLog('Aimneck: Module active')">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <!-- MB HS ANGIN -->
+            <div class="feature-card">
+                <div class="feature-info">
+                    <span class="name">MB HS ANGIN</span>
+                    <span class="desc">High damage bypass air-hit</span>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" onchange="updateLog('MB HS ANGIN: Loading offsets...')">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <!-- Premium Mode (LOCKED) -->
+            <div class="feature-card card-premium">
+                <div class="lock-overlay">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="var(--premium)"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+                    <span class="lock-text">Minta Akses Ke Botak Trogon</span>
+                </div>
+                <div class="feature-info">
+                    <span class="name">PREMIUM MODE</span>
+                    <span class="desc">Garis Kuning: VIP Bypass access</span>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" disabled>
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <!-- Secondary features -->
+            <div class="feature-card">
+                <div class="feature-info">
+                    <span class="name">NO FPS LIMIT</span>
+                    <span class="desc">Unlock device max framerate bypass</span>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" onchange="updateLog('FPS Engine: Unlocked')">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-info">
+                    <span class="name">MINI GLOOWALL</span>
+                    <span class="desc">Semi-transparent small wall mesh</span>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" onchange="updateLog('GlooWall Patch: Applied')">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <div class="console" id="console">
+            [SYS] Waiting for authorization...<br>
+            [SYS] Kernel v4.0.5 Ready
+        </div>
+
+        <button class="inject-btn" onclick="startInjection()">Inject Features</button>
+
+        <div class="watermark" style="text-align: center; margin-top: 10px; font-size: 0.6rem; color: var(--text-dim);">
+            Developed by <strong>Botaktrogonff</strong>
+        </div>
+    </div>
+
+    <!-- Overlay Loading -->
+    <div id="overlay">
+        <div class="loader"></div>
+        <div id="loading-txt" style="color: var(--accent); margin-top: 15px; font-family: 'Orbitron'; font-size: 0.75rem; letter-spacing: 1px;">INITIALIZING BYPASS...</div>
+    </div>
+
+    <!-- Fake Success Modal -->
+    <div id="success-modal">
+        <div style="background: rgba(0, 255, 136, 0.1); width: 60px; height: 60px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 15px;">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        </div>
+        <h2 style="color: var(--success); margin: 0; font-family: 'Orbitron'; font-size: 1.1rem; letter-spacing: 1px;">INJECTION SUCCESSFUL</h2>
+        <p style="font-size: 0.85rem; color: var(--text-main); margin: 15px 0;">Semua fitur yang dipilih telah berhasil diinjeksikan ke dalam sistem game.</p>
+        <p style="font-size: 0.7rem; color: var(--text-dim); border-top: 1px solid rgba(255,255,255,0.05); padding-top: 10px;">Anda dapat kembali ke game sekarang. Fitur akan berjalan di latar belakang.</p>
+        <button onclick="location.reload()" style="background: var(--success); border: none; color: #000; padding: 12px; border-radius: 6px; cursor: pointer; font-family: 'Rajdhani'; font-weight: bold; width: 100%; margin-top: 10px; text-transform: uppercase;">OK, LANJUTKAN</button>
+    </div>
+
+    <script>
+        function updateLog(msg) {
+            const consoleBox = document.getElementById('console');
+            const time = new Date().toLocaleTimeString([], {hour12: false, hour: '2-digit', minute:'2-digit', second:'2-digit'});
+            consoleBox.innerHTML = `[${time}] ${msg}<br>` + consoleBox.innerHTML;
+        }
+
+        function toggleStream(cb) {
+            if (cb.checked) {
+                document.body.classList.add('stream-active');
+                updateLog('Stream Mode: ON (Garis Hijau Aktif)');
+            } else {
+                document.body.classList.remove('stream-active');
+                updateLog('Stream Mode: OFF');
+            }
+        }
+
+        function updateFOV(el) {
+            document.getElementById('fovVal').innerText = el.value + '°';
+            if (el.value % 60 === 0) updateLog(`FOV Radius: ${el.value}°`);
+        }
+
+        function updateDistance(el) {
+            document.getElementById('distVal').innerText = el.value + 'm';
+            if (el.value % 100 === 0) updateLog(`Radar Distance: ${el.value}m`);
+        }
+
+        function startInjection() {
+            const overlay = document.getElementById('overlay');
+            const loadTxt = document.getElementById('loading-txt');
+            overlay.style.display = 'flex';
+
+            const steps = [
+                "MEMULAI PROSES DATA MOD MENU...",
+                "DATA TELAH DIPROSES...",
+                "BYPASS MOD MENU V1.2...",
+                "UPDATE PATCH DATA...",
+                "ENCRIPTION SCRIPT...",
+                "INJECTION MOD MENU FINAL..."
+            ];
+
+            let i = 0;
+            const interval = setInterval(() => {
+                if (i < steps.length) {
+                    loadTxt.innerText = steps[i];
+                    i++;
+                } else {
+                    clearInterval(interval);
+                    overlay.style.display = 'none';
+                    document.getElementById('success-modal').style.display = 'block';
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
+
